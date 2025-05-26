@@ -11,6 +11,16 @@ on:
       - "components/shared/package.json"
       - "./github/workflows/deploy-storybook.yml"
 
+  pull_request: # PR시에도 위와 동일함
+    branches:
+      - main
+    paths:
+      - "components/shared/**"
+      - ".storybook/**"
+      - "package.json"
+      - "components/shared/package.json"
+      - ".github/workflows/your-workflow-file.yml"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
