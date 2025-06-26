@@ -12,6 +12,7 @@ const EXCLUDED_PATTERNS = [
   `**/*${STORY_FILE_SUFFIX}`,
   "**/*.test.{tsx,jsx}",
   "**/*.spec.{tsx,jsx}",
+  "components/icons/**.tsx",
   // 필요시 다른 제외 패턴 추가
 ];
 // --- 설정 끝 ---
