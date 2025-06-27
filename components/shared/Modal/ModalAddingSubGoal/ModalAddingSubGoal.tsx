@@ -14,6 +14,7 @@ const ModalAddingSubGoal = ({
   onClose,
   onAddSubGoal,
 }: ModalAddingSubGoalProps) => {
+  const [subGoal, setSubGoal] = useState("");
   return (
     <>
       <Modal
@@ -38,7 +39,24 @@ const ModalAddingSubGoal = ({
                 <CloseSvg />
               </button>
             </div>
-            <Body onAddSubGoal={onAddSubGoal} />
+            {/* <Body onAddSubGoal={onAddSubGoal} /> */}
+            <form
+              id="subGoalAdding"
+              className="w-full"
+              onSubmit={(e) => {
+                // 새로고침 방지
+                e.preventDefault();
+
+                onAddSubGoal(subGoal);
+              }}
+            >
+              <TextField
+                placeholder="세부 목표를 입력해주세요."
+                isError={false}
+                onChange={(e) => setSubGoal(e.target.value)}
+                value={subGoal}
+              />
+            </form>
           </div>
         }
         footerNode={[
@@ -46,11 +64,12 @@ const ModalAddingSubGoal = ({
             // onClick={() => {
             //   onClose();
             // }}
+            disabled={subGoal.length <= 0}
             key={"add"}
             form="subGoalAdding"
             type="submit"
             text="추가하기"
-            color="primary"
+            color={"primary"}
           />,
         ]}
       />
