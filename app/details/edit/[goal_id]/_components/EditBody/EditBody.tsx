@@ -24,6 +24,7 @@ import SubGoalEdit from "../SubGoalEdit/SubGoalEdit";
 
 import { date2StringWithSpliter } from "@/utils/date2String";
 import { goalApi } from "@/api/service";
+import useToast from "@/hooks/useToast";
 
 // import { updateGoal } from "@/lib/fetching/goalFetching";
 
@@ -53,10 +54,10 @@ interface EditBodyProps {
 
 const EditBody = ({ goalId, initData, tab }: EditBodyProps) => {
   const router = useRouter();
-
-  const { closeModal, openModal } = useModal();
+  // const { closeModal, openModal } = useModal();
   const { mutate } = useGoalWithSubGoalTodo(goalId);
   const [editContents, setEditContents] = useState<EditContents>(initData);
+  const { setToast } = useToast();
   return (
     <>
       <EditContext.Provider value={{ editContents, setEditContents }}>
@@ -100,11 +101,16 @@ const EditBody = ({ goalId, initData, tab }: EditBodyProps) => {
             });
             if (res) {
               mutate();
+              setToast("변경이 완료되었습니다.");
               router.back();
             }
           }}
         >
-          {tab === "goal" ? <GoalEdit /> : <SubGoalEdit goalId={goalId} />}
+          {tab === "goal" ? (
+            <GoalEdit goalId={goalId} />
+          ) : (
+            <SubGoalEdit goalId={goalId} />
+          )}
           {/** zustaond로 관리하는 것들 GoalEdit이랑 SubGoalEdit내용 넣기. tab에 따라 다르게 렌더링 시키고 */}
         </form>
       </EditContext.Provider>
