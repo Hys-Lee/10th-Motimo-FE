@@ -8,6 +8,8 @@ import { BottomTabBar } from "@/components/shared/BottomTabBar/BottomTabBar";
 import { useMyProfile } from "@/api/hooks";
 import { calcLeftDay } from "@/utils/calcLeftDay";
 import GoalDataContainer from "@/components/main/GoalDataContainer/GoalDataContainer";
+import { useEffect } from "react";
+import useAuthStore from "@/stores/useAuthStore";
 
 // AuthGuard는 클라이언트에서만 렌더링 (localStorage 접근 필요)
 const AuthGuard = dynamic(() => import("./_components/AuthGuard"), {
@@ -16,9 +18,34 @@ const AuthGuard = dynamic(() => import("./_components/AuthGuard"), {
 
 export default function Main() {
   const { data } = useMyProfile();
-  const tmpDaysOfServiceUse = data?.createdAt 
+  const tmpDaysOfServiceUse = data?.createdAt
     ? calcLeftDay(new Date(), new Date(data.createdAt))
     : 0;
+
+  // 웹뷰 관련
+  const { setRefreshToken, setAccessToken } = useAuthStore();
+  useEffect(() => {
+    const messageHandler = (event: Event) => {
+      try {
+        const message = JSON.parse((event as MessageEvent).data);
+
+        if (message.body) {
+          const { accessToken, refreshToken } = message.body;
+          //test
+          alert(`${accessToken}, ${refreshToken}`);
+          setAccessToken(accessToken);
+          setRefreshToken(refreshToken);
+        }
+      } catch (e) {
+        console.error("메시지 관련 에러: ", e);
+      }
+    };
+    document.addEventListener("message", messageHandler);
+
+    return () => {
+      document.removeEventListener("message", messageHandler);
+    };
+  }, []);
 
   return (
     <AuthGuard>
