@@ -16,6 +16,9 @@ interface AuthState {
   // User state
   isLoggedIn: boolean;
   hasCompletedOnboarding: boolean;
+
+  // Guest
+  isGuest: boolean;
 }
 
 interface AuthActions {
@@ -37,6 +40,9 @@ interface AuthActions {
   logout: () => void;
   clearOauthData: () => void;
   reset: () => void;
+
+  // Guest
+  setIsGuest: (status: boolean) => void;
 }
 
 type AuthStore = AuthState & AuthActions;
@@ -52,9 +58,13 @@ const useAuthStore = create<AuthStore>()(
       oauthReturnStep: null,
       isLoggedIn: false,
       hasCompletedOnboarding: false,
+      isGuest: false,
 
       // Token setters
-      setAccessToken: (token) => set({ accessToken: token }),
+      setAccessToken: (token) => set((state) => ({ 
+        accessToken: token,
+        isGuest: token ? false : state.isGuest
+      })),
       setRefreshToken: (token) => set({ refreshToken: token }),
 
       // OAuth setters
@@ -63,12 +73,15 @@ const useAuthStore = create<AuthStore>()(
       setOauthReturnStep: (step) => set({ oauthReturnStep: step }),
 
       // User state setters
-      setIsLoggedIn: (status) => set({ isLoggedIn: status }),
+      setIsLoggedIn: (status) => set((state) => ({ 
+        isLoggedIn: status, 
+        isGuest: status ? false : state.isGuest 
+      })),
       setHasCompletedOnboarding: (status) =>
         set({ hasCompletedOnboarding: status }),
 
       // Utility functions
-      login: () => set({ isLoggedIn: true }),
+      login: () => set({ isLoggedIn: true, isGuest: false }),
 
       logout: () =>
         set({
@@ -97,7 +110,12 @@ const useAuthStore = create<AuthStore>()(
           oauthReturnStep: null,
           isLoggedIn: false,
           hasCompletedOnboarding: false,
+          // guest
+          isGuest: false,
         }),
+
+      // Guest
+      setIsGuest: (newVal) => set({ isGuest: newVal }),
     }),
     {
       name: "auth-storage",
@@ -109,6 +127,9 @@ const useAuthStore = create<AuthStore>()(
         isLoggedIn: state.isLoggedIn,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         // OAuth 임시 데이터는 제외
+
+        // Guest
+        isGuest: state.isGuest,
       }),
     },
   ),

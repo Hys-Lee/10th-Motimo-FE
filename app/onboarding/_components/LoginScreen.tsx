@@ -10,13 +10,15 @@ import {
 } from "@/lib/constants";
 import MotimoLogoBlack from "@/components/shared/public/MOTIMO_LOGO_BLACK.svg";
 import useAuthStore from "@/stores/useAuthStore";
+import { DB_NAME } from "@/mocks/guestMode/db";
 
 interface LoginScreenProps {
   onNext: () => void;
 }
 
 export default function LoginScreen({ onNext }: LoginScreenProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false);
   const {
     oauthState,
     setOauthState,
@@ -26,6 +28,9 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
     setRefreshToken,
     login,
     clearOauthData,
+    setIsGuest,
+    reset,
+    setHasCompletedOnboarding,
   } = useAuthStore();
 
   // OAuth 콜백 처리 (URL 파라미터 방식)
@@ -62,7 +67,8 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
     if (error) {
       console.error("OAuth 인증 오류:", error);
       console.error("OAuth 로그인 실패");
-      setIsLoading(false);
+      setIsGoogleLoading(false);
+      setIsKakaoLoading(false);
       return;
     }
 
@@ -74,7 +80,8 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
       if (state && oauthState && state !== oauthState) {
         console.error("State 파라미터가 일치하지 않습니다.");
         console.error("OAuth state 파라미터 불일치");
-        setIsLoading(false);
+        setIsGoogleLoading(false);
+        setIsKakaoLoading(false);
         return;
       }
 
@@ -135,7 +142,7 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
   ]);
 
   const handleGoogleLogin = () => {
-    setIsLoading(true);
+    setIsGoogleLoading(true);
 
     // 현재 페이지 상태 저장 (인증 후 돌아올 때 사용)
     const currentStep = "login";
@@ -151,22 +158,40 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
   };
 
   const handleKakaoLogin = () => {
-    // TODO: Implement Kakao login
-    login();
-    onNext();
+    setIsKakaoLoading(true);
+
+    // 현재 페이지 상태 저장 (인증 후 돌아올 때 사용)
+    const currentStep = "login";
+    setOauthReturnStep(currentStep);
+
+    // CSRF 보호를 위한 state 파라미터 생성
+    const state = Math.random().toString(36).substring(2, 15);
+    setOauthState(state);
+
+    // Kakao OAuth 인증 페이지로 리다이렉트
+    const redirect_uri = `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/onboarding`;
+    window.location.href = `${OAUTH_ENDPOINTS.KAKAO_AUTHORIZE}?redirect_uri=${redirect_uri}&state=${state}`;
   };
 
-  const handleBrowse = () => {
+  const handleBrowse = async () => {
     // TODO: Handle browse without login
+    reset();
+
+    // 게스트모드 로그인 기록 확인
+    const dbs = await indexedDB.databases();
+    const hasGuestDB = dbs.find((db) => db.name === DB_NAME);
+    if (hasGuestDB) setHasCompletedOnboarding(true);
+
     login();
-    onNext();
+    setIsGuest(true);
+
+    if (!hasGuestDB) onNext();
   };
 
   return (
     <div className="min-h-screen bg-background-normal flex flex-col">
-      {/* Status Bar */}
+      {/* Status Bar -> just margin */}
       <div className="flex justify-between items-end gap-[286px] px-6 py-[10px] h-[52px]">
-        {/* <div className="text-sm font-medium text-label-normal">9:30</div> */}
         <div className="flex items-center gap-4">
           {/* Wifi, Signal, Battery icons would go here */}
           <div className="w-[46px] h-[17px]"></div>
@@ -213,27 +238,32 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
           {/* Google Login */}
           <button
             onClick={handleGoogleLogin}
-            disabled={isLoading}
+            disabled={isGoogleLoading}
             className="w-full flex items-center justify-center gap-2 py-[15px] px-4 bg-background-alternative border border-line-normal rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? (
+            {isGoogleLoading ? (
               <div className="w-6 h-6 border-2 border-label-normal border-t-transparent rounded-full animate-spin"></div>
             ) : (
               <GoogleIcon size={24} />
             )}
             <span className="text-sm font-semibold text-label-normal">
-              {isLoading ? "로그인 중..." : "Google로 시작하기"}
+              {isGoogleLoading ? "로그인 중..." : "Google로 시작하기"}
             </span>
           </button>
 
           {/* Kakao Login */}
           <button
             onClick={handleKakaoLogin}
-            className="w-full flex items-center justify-center gap-2 py-[15px] px-4 bg-[#FEE500] rounded-lg"
+            disabled={isKakaoLoading}
+            className="w-full flex items-center justify-center gap-2 py-[15px] px-4 bg-[#FEE500] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <KakaoIcon size={24} />
+            {isKakaoLoading ? (
+              <div className="w-6 h-6 border-2 border-label-normal border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <KakaoIcon size={24} />
+            )}
             <span className="text-sm font-semibold text-label-normal">
-              카카오로 시작하기
+              {isKakaoLoading ? "로그인 중..." : "카카오로 시작하기"}
             </span>
           </button>
 
@@ -250,9 +280,9 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
       </div>
 
       {/* Gesture bar */}
-      <div className="h-6 flex justify-center items-center">
+      {/* <div className="h-6 flex justify-center items-center">
         <div className="w-[108px] h-1 bg-label-normal rounded-full"></div>
-      </div>
+      </div> */}
     </div>
   );
 }

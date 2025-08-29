@@ -27,7 +27,7 @@ interface MyPageProps {
 
 export function MyPage({ className = "" }: MyPageProps) {
   const router = useSafeRouter();
-  const { isLoggedIn, login, logout } = useAuthStore();
+  const { isLoggedIn, login, logout, isGuest } = useAuthStore();
   const { data: user, isLoading, error } = useMyProfile();
 
   const handleLogin = () => {
@@ -61,6 +61,7 @@ export function MyPage({ className = "" }: MyPageProps) {
           hasIcon: false,
           onClick: () => {
             logout();
+            // setIsGuest(false);
             router.push("/");
           },
         },
@@ -79,23 +80,23 @@ export function MyPage({ className = "" }: MyPageProps) {
       ];
 
   return (
-    <div className={`min-h-screen bg-Color-gray-5 flex flex-col ${className}`}>
+    <div className={`min-h-screen flex flex-col ${className}`}>
       {/* App Bar */}
-      <AppBar
-        title="마이페이지"
-        type="main"
-      />
+      <AppBar title="마이페이지" type="main" />
 
       {/* Content */}
-      <div className="flex-1 flex flex-col">
-        {isLoggedIn ? (
+      <div className="flex-1 flex flex-col bg-white">
+        {/* {isLoggedIn ? ( */}
+        {!isGuest ? (
           <>
             {/* User Information Section */}
-            <div className="bg-Color-white px-4 py-5">
+            <div className="bg-Color-white py-5">
               <UserProfile
                 name={user?.nickname ?? ""}
                 profileImage={user?.profileImageUrl}
-                onAddInterests={() => console.log("Add interests")}
+                onAddInterests={() =>
+                  router.push("/mypage/edit?openInterests=true")
+                }
               />
             </div>
 
@@ -118,11 +119,6 @@ export function MyPage({ className = "" }: MyPageProps) {
 
       {/* Bottom Tab Bar */}
       <BottomTabBar type="4" />
-
-      {/* Gesture Bar */}
-      {/* <div className="h-6 flex justify-center items-center">
-                <div className="w-[108px] h-1 bg-Color-gray-90 rounded-full"></div>
-            </div> */}
     </div>
   );
 }

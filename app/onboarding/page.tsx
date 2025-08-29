@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import LoginScreen from "./_components/LoginScreen";
 import GoalInputScreen from "./_components/GoalInputScreen";
 import PeriodSelectionScreen from "./_components/PeriodSelectionScreen";
+import SubGoalSelectionScreen from "./_components/SubGoalSelectionScreen";
 import CompletionScreen from "./_components/CompletionScreen";
 import useAuthStore from "@/stores/useAuthStore";
 import { useGoals } from "@/api/hooks";
@@ -14,8 +15,12 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [hasHydrated, setHasHydrated] = useState(false);
-  const { setHasCompletedOnboarding, isLoggedIn, hasCompletedOnboarding } =
-    useAuthStore();
+  const {
+    setHasCompletedOnboarding,
+    isLoggedIn,
+    hasCompletedOnboarding,
+    isGuest,
+  } = useAuthStore();
 
   // 클라이언트 사이드에서만 hydration 체크
   useEffect(() => {
@@ -31,16 +36,13 @@ export default function OnboardingPage() {
   console.log("isLoggedIn:", isLoggedIn);
   console.log("hasCompletedOnboarding:", hasCompletedOnboarding);
 
-  // hasCompletedOnboarding이 true면 즉시 redirect (hydration 후에만)
-  useEffect(() => {
-    if (hasHydrated && hasCompletedOnboarding) {
-      router.replace("/");
-      return;
-    }
-  }, [hasHydrated, hasCompletedOnboarding, router]);
-
   // goals 가져오기
-  const { data: { goals } = {}, isLoading, error, mutate } = useGoals({
+  const {
+    data: { goals } = {},
+    isLoading,
+    error,
+    mutate,
+  } = useGoals({
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     shouldRetryOnError: false, // 401 에러 시 재시도 방지
@@ -58,12 +60,32 @@ export default function OnboardingPage() {
   console.log("isLoading:", isLoading);
   console.log("error:", error);
 
+  // 통합된 redirect 로직
   useEffect(() => {
-    if (hasHydrated && isLoggedIn && goals && goals.length > 0) {
+    if (!hasHydrated) return;
+
+    // 이미 온보딩을 완료했으면 redirect (게스트도 포함)
+    if (hasCompletedOnboarding && isLoggedIn) {
+      // if (hasCompletedOnboarding && isLoggedIn && !isGuest) {
+      router.replace("/");
+      return;
+    }
+
+    // 로그인된 상태에서 goals가 있으면 onboarding 완료 처리 후 redirect (게스트가 아닌 경우만)
+    if (isLoggedIn && goals && goals.length > 0 && !isGuest) {
       setHasCompletedOnboarding(true);
       router.replace("/");
+      return;
     }
-  }, [hasHydrated, isLoggedIn, goals, setHasCompletedOnboarding, router]);
+  }, [
+    hasHydrated,
+    hasCompletedOnboarding,
+    isLoggedIn,
+    isGuest,
+    goals,
+    setHasCompletedOnboarding,
+    router,
+  ]);
 
   const nextStep = () => {
     setCurrentStep((prev) => prev + 1);
@@ -82,12 +104,12 @@ export default function OnboardingPage() {
       case 2:
         return <PeriodSelectionScreen onNext={nextStep} onBack={prevStep} />;
       case 3:
+        return <SubGoalSelectionScreen onNext={nextStep} onBack={prevStep} />;
+      case 4:
         return (
           <CompletionScreen
             onComplete={() => {
-              // Navigate to main app
               setHasCompletedOnboarding(true);
-              router.replace("/");
             }}
           />
         );
@@ -101,8 +123,13 @@ export default function OnboardingPage() {
     return <Loading className="min-h-screen bg-background-normal" />;
   }
 
-  // 로그인된 상태에서 처리 중이면 스피너 표시
-  if (hasHydrated && isLoggedIn && (isLoading || (!goals && !error) || (goals && goals.length > 0))) {
+  // 로그인된 상태에서 처리 중이면 스피너 표시 (게스트가 아닌 경우만)
+  if (
+    hasHydrated &&
+    isLoggedIn &&
+    !isGuest &&
+    (isLoading || (!goals && !error) || (goals && goals.length > 0))
+  ) {
     return <Loading className="min-h-screen bg-background-normal" />;
   }
 
