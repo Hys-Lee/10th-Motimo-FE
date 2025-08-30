@@ -11,6 +11,10 @@ import GoalDataContainer from "@/components/main/GoalDataContainer/GoalDataConta
 import { useEffect } from "react";
 import useAuthStore from "@/stores/useAuthStore";
 
+interface ReactNativeWebView {
+  postMessage(message: string): void;
+}
+
 // AuthGuard는 클라이언트에서만 렌더링 (localStorage 접근 필요)
 const AuthGuard = dynamic(() => import("./_components/AuthGuard"), {
   ssr: false,
@@ -35,6 +39,19 @@ export default function Main() {
           alert(`${accessToken}, ${refreshToken}`);
           setAccessToken(accessToken);
           setRefreshToken(refreshToken);
+
+          // RN에 "토큰 잘 받았고, 저장된 값은 이거야" 라고 보고하는 메시지 전송
+          if (window.ReactNativeWebView) {
+            const reportMessage = {
+              body: {
+                receivedAccessToken: accessToken,
+                storedAccessToken: localStorage.getItem("accessToken"),
+              },
+            };
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify(reportMessage),
+            );
+          }
         }
       } catch (e) {
         console.error("메시지 관련 에러: ", e);
