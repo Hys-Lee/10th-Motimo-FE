@@ -10,7 +10,7 @@
 
 [버그 신고](https://github.com/prography/10th-Motimo-FE/issues) · [기능 요청](https://github.com/prography/10th-Motimo-FE/issues)
 
-**[데모 링크](https://motimo-fe-dev.netlify.app)**
+**[서비스 링크](https://motimo-todo.kro.kr)**
 
 </div>
 
