@@ -32,7 +32,8 @@ export default function Main() {
     const messageHandler = (event: Event) => {
       try {
         const message = JSON.parse((event as MessageEvent).data);
-
+        //test
+        console.log("meesage: ", message);
         if (message.body) {
           const { accessToken, refreshToken } = message.body;
           //test
