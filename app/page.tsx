@@ -27,7 +27,7 @@ export default function Main() {
     : 0;
 
   // 웹뷰 관련
-  const { setRefreshToken, setAccessToken } = useAuthStore();
+  const { setRefreshToken, setAccessToken, setIsLoggedIn } = useAuthStore();
   useEffect(() => {
     const messageHandler = (event: Event) => {
       try {
@@ -39,6 +39,7 @@ export default function Main() {
           alert(`${accessToken}, ${refreshToken}`);
           setAccessToken(accessToken);
           setRefreshToken(refreshToken);
+          if (accessToken && refreshToken) setIsLoggedIn(true);
 
           // RN에 "토큰 잘 받았고, 저장된 값은 이거야" 라고 보고하는 메시지 전송
           if (window.ReactNativeWebView) {
