@@ -6,6 +6,7 @@ import ModalRenderer from "./_components/ModalRenderer";
 import ToastRenderer from "./_components/ToastRenderer";
 import BottomSheetRenderer from "./_components/BottomSheetRenderer";
 import GuestModeHandler from "./_components/GuestModeHandler";
+import WebViewHandler from "./_components/WebViewHandler";
 
 const customFont = localFont({
   src: "../public/fonts/SUIT-Variable.woff2",
@@ -38,6 +39,7 @@ export default function RootLayout({
         className={`${customFont.variable} antialiased bg-background-alternative`}
       >
         <GuestModeHandler />
+        <WebViewHandler />
         <div className="w-[360px] mx-auto min-h-screen bg-background-normal">
           {/* {process.env.NODE_ENV === "development" && <MSWComponent />} */}
           <ModalRenderer />

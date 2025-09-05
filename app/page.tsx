@@ -26,45 +26,43 @@ export default function Main() {
     ? calcLeftDay(new Date(), new Date(data.createdAt))
     : 0;
 
-  // 웹뷰 관련
-  const { setRefreshToken, setAccessToken, setIsLoggedIn } = useAuthStore();
-  useEffect(() => {
-    const messageHandler = (event: Event) => {
-      try {
-        const message = JSON.parse((event as MessageEvent).data);
-        //test
-        console.log("meesage: ", message);
-        if (message.body) {
-          const { accessToken, refreshToken } = message.body;
-          //test
-          alert(`${accessToken}, ${refreshToken}`);
-          setAccessToken(accessToken);
-          setRefreshToken(refreshToken);
-          if (accessToken && refreshToken) setIsLoggedIn(true);
+  // // 웹뷰 관련
+  // const { setRefreshToken, setAccessToken, setIsLoggedIn } = useAuthStore();
+  // useEffect(() => {
+  //   const messageHandler = (event: Event) => {
+  //     try {
+  //       const message = JSON.parse((event as MessageEvent).data);
+  //       if (message.payload && message.type === "TOKEN_INJECTION") {
+  //         const { accessToken, refreshToken } = message.payload;
+  //         //test
+  //         alert(`${accessToken}, ${refreshToken}`);
+  //         setAccessToken(accessToken);
+  //         setRefreshToken(refreshToken);
+  //         if (accessToken && refreshToken) setIsLoggedIn(true);
 
-          // RN에 "토큰 잘 받았고, 저장된 값은 이거야" 라고 보고하는 메시지 전송
-          if (window.ReactNativeWebView) {
-            const reportMessage = {
-              body: {
-                receivedAccessToken: accessToken,
-                storedAccessToken: localStorage.getItem("accessToken"),
-              },
-            };
-            window.ReactNativeWebView.postMessage(
-              JSON.stringify(reportMessage),
-            );
-          }
-        }
-      } catch (e) {
-        console.error("메시지 관련 에러: ", e);
-      }
-    };
-    document.addEventListener("message", messageHandler);
+  //         // RN에 "토큰 잘 받았고, 저장된 값은 이거야" 라고 보고하는 메시지 전송
+  //         if (window.ReactNativeWebView) {
+  //           const reportMessage = {
+  //             body: {
+  //               receivedAccessToken: accessToken,
+  //               storedAccessToken: localStorage.getItem("accessToken"),
+  //             },
+  //           };
+  //           window.ReactNativeWebView.postMessage(
+  //             JSON.stringify(reportMessage),
+  //           );
+  //         }
+  //       }
+  //     } catch (e) {
+  //       console.error("메시지 관련 에러: ", e);
+  //     }
+  //   };
+  //   document.addEventListener("message", messageHandler);
 
-    return () => {
-      document.removeEventListener("message", messageHandler);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener("message", messageHandler);
+  //   };
+  // }, []);
 
   return (
     <AuthGuard>

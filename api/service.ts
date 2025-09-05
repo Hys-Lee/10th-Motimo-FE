@@ -1,6 +1,7 @@
 import { Api, HttpClient, HttpResponse } from "./generated/motimo/Api";
 import useAuthStore from "../stores/useAuthStore";
 import useToastStore from "@/stores/useToastStore";
+import { handleWebViewReissueToken } from "@/app/_components/WebViewHandler";
 
 // HTTP 클라이언트 생성 시 인증 헤더를 자동으로 추가하는 securityWorker 설정
 const httpClient = new HttpClient({
@@ -83,6 +84,14 @@ const tokenHandler = async <T, E>(
         // window.location.href = "/";
         throw new Error("no refresh token");
       }
+
+      // 웹뷰용 처리
+      if (window.ReactNativeWebView) {
+        handleWebViewReissueToken(token);
+        return;
+      }
+
+      // 웹용 처리
       const tokenRes = await api.authController.reissue({
         refreshToken: token,
       });
