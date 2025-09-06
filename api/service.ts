@@ -82,7 +82,8 @@ const tokenHandler = async <T, E>(
       if (!token) {
         // api.authController.logout();
         // window.location.href = "/";
-        throw new Error("no refresh token");
+        // throw new Error("no refresh token");
+        console.error("no refresh token");
       }
 
       // 웹뷰용 처리
@@ -93,7 +94,7 @@ const tokenHandler = async <T, E>(
 
       // 웹용 처리
       const tokenRes = await api.authController.reissue({
-        refreshToken: token,
+        refreshToken: token || undefined,
       });
 
       if (!tokenRes?.accessToken || !tokenRes?.refreshToken) {
