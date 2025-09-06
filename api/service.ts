@@ -84,6 +84,7 @@ const tokenHandler = async <T, E>(
         // window.location.href = "/";
         // throw new Error("no refresh token");
         console.error("no refresh token");
+        return;
       }
 
       // 웹뷰용 처리
