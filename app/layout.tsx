@@ -6,7 +6,7 @@ import ModalRenderer from "./_components/ModalRenderer";
 import ToastRenderer from "./_components/ToastRenderer";
 import BottomSheetRenderer from "./_components/BottomSheetRenderer";
 import GuestModeHandler from "./_components/GuestModeHandler";
-import WebViewHandler from "./_components/WebViewHandler";
+// import WebViewHandler from "./_components/WebViewHandler";
 
 const customFont = localFont({
   src: "../public/fonts/SUIT-Variable.woff2",
