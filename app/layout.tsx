@@ -39,7 +39,7 @@ export default function RootLayout({
         className={`${customFont.variable} antialiased bg-background-alternative`}
       >
         <GuestModeHandler />
-        <WebViewHandler />
+        {/* <WebViewHandler /> */}
         <div className="w-[360px] mx-auto min-h-screen bg-background-normal">
           {/* {process.env.NODE_ENV === "development" && <MSWComponent />} */}
           <ModalRenderer />

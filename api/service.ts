@@ -86,10 +86,10 @@ const tokenHandler = async <T, E>(
       }
 
       // 웹뷰용 처리
-      if (window.ReactNativeWebView) {
-        handleWebViewReissueToken(token);
-        return;
-      }
+      // if (window.ReactNativeWebView) {
+      //   handleWebViewReissueToken(token);
+      //   return;
+      // }
 
       // 웹용 처리
       const tokenRes = await api.authController.reissue({
