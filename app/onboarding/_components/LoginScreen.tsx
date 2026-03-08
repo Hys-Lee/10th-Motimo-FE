@@ -12,6 +12,8 @@ import MotimoLogoBlack from "@/components/shared/public/MOTIMO_LOGO_BLACK.svg";
 import useAuthStore from "@/stores/useAuthStore";
 import { DB_NAME } from "@/mocks/guestMode/db";
 
+import Cookies from "js-cookie";
+
 interface LoginScreenProps {
   onNext: () => void;
 }
@@ -97,11 +99,15 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
       // URL 파라미터에서 토큰 저장
       if (accessTokenFromUrl) {
         setAccessToken(accessTokenFromUrl);
+
+        Cookies.set("accessToken", accessTokenFromUrl);
+
         console.log("✅ Access Token 저장됨:", accessTokenFromUrl);
       }
 
       if (refreshTokenFromUrl) {
         setRefreshToken(refreshTokenFromUrl);
+        Cookies.set("refreshToken", refreshTokenFromUrl);
         console.log("✅ Refresh Token 저장됨:", refreshTokenFromUrl);
       }
 
@@ -184,7 +190,8 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
 
     login();
     setIsGuest(true);
-    // onNext();
+
+    if (!hasGuestDB) onNext();
   };
 
   return (
@@ -279,9 +286,9 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
       </div>
 
       {/* Gesture bar */}
-      <div className="h-6 flex justify-center items-center">
+      {/* <div className="h-6 flex justify-center items-center">
         <div className="w-[108px] h-1 bg-label-normal rounded-full"></div>
-      </div>
+      </div> */}
     </div>
   );
 }
